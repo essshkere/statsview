@@ -19,6 +19,7 @@ class StatsView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0,
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
+    private var rotationProgress = 0f
     private var radius = 0F
     private var center = PointF(0F, 0F)
     private var oval = RectF(0F, 0F, 0F, 0F)
@@ -46,6 +47,11 @@ class StatsView @JvmOverloads constructor(
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
         textSize = fontSize
+    }
+
+    fun setRotationProgress(progress: Float) {
+        rotationProgress = progress.coerceIn(0f, 1f)
+        invalidate()
     }
 
     var data: List<Float> = emptyList()
@@ -76,8 +82,10 @@ class StatsView @JvmOverloads constructor(
         if (data.isEmpty()) {
             return
         }
+        canvas.save()
 
         var startFrom = -90F
+        canvas.rotate(360f * rotationProgress, center.x, center.y)
         val firstColor = colors.firstOrNull() ?: randomColor()
         for ((index, datum) in data.withIndex()) {
             val angle = 360F * datum
@@ -88,6 +96,7 @@ class StatsView @JvmOverloads constructor(
 
         paint.color = firstColor
         canvas.drawCircle(center.x, center.y - radius, lineWidth / 2, paint)
+        canvas.restore()
 
         canvas.drawText(
             "%.2f%%".format(data.sum() * 100),

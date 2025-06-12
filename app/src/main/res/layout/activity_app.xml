@@ -15,4 +15,12 @@
         app:fontSize="50dp"
         app:colors="@array/colors"
         />
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="350dp"
+        android:text="100" />
 </FrameLayout>
