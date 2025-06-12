@@ -1,8 +1,6 @@
 package ru.netology.statsview.ui
 
-import android.animation.ValueAnimator
 import android.os.Bundle
-import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import ru.netology.statsview.R
 
@@ -10,25 +8,22 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val statsView = findViewById<StatsView>(R.id.stats)
+        setContentView(R.layout.activity_app)
 
-        findViewById<StatsView>(R.id.stats).data = listOf(
-            0.25F,
-            0.25F,
-            0.25F,
-            0.25F,
-        )
-
-
-        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 1000
-            repeatCount = ValueAnimator.INFINITE
-            repeatMode = ValueAnimator.RESTART
-            interpolator = LinearInterpolator()
-            addUpdateListener { animation ->
-                statsView.setRotationProgress(animation.animatedValue as Float)
-            }
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, MapsFragment())
+                .commit()
         }
-        animator.start()
+    }
 
-    }}
+    fun showMarkersList() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, MarkersListFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
+
+}
+
