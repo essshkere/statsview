@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -17,12 +19,13 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        Properties properties = new Properties()
-        if (rootProject.file("maps.properties").exists()) {
-            properties.load(rootProject.file("maps.properties").newDataInputStream())
+        val properties = Properties()
+        val localProperties = rootProject.file("maps.properties")
+        if (localProperties.exists()) {
+            localProperties.inputStream().use { properties.load(it) }
         }
 
-        manifestPlaceholders.mapsApiKey = properties.getProperty("MAPS_API_KEY", "")
+        manifestPlaceholders["mapsApiKey"] = properties.getProperty("MAPS_API_KEY", "")
 
     }
 
@@ -48,8 +51,6 @@ android {
 }
 
 dependencies {
-
-    implementation ("com.google.android.gms:play-services-maps:19.2.0")
     implementation ("com.google.maps.android:maps-ktx:3.4.0")
     implementation ("com.google.maps.android:maps-utils-ktx:3.4.0")
     implementation ("com.google.code.gson:gson:2.11.0")
@@ -77,4 +78,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+configurations.all {
+    resolutionStrategy {
+
+        exclude(group = "com.intellij", module = "annotations")
+
+        force("org.jetbrains:annotations:23.0.0")
+    }
 }
