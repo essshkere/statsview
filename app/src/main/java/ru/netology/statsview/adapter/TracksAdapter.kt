@@ -39,11 +39,15 @@ class TracksAdapter(
         fun bind(track: Track) {
             binding.apply {
                 trackNumber.text = track.id.toString()
-                trackTitle.text = "Track ${track.id}"
+                trackTitle.text = "Трек ${track.id} (${track.file})"
 
                 playPauseButton.setImageResource(
                     if (track.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
                 )
+
+                playPauseButton.setOnClickListener {
+                    onTrackClick(track)
+                }
 
                 root.setOnClickListener {
                     onTrackClick(track)

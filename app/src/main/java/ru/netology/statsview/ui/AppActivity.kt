@@ -3,6 +3,7 @@ package ru.netology.statsview.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import ru.netology.statsview.R
 import ru.netology.statsview.adapter.TracksAdapter
 import ru.netology.statsview.api.AlbumService
@@ -19,6 +20,7 @@ class AppActivity : AppCompatActivity() {
     private val mediaObserver = MediaLifecycleObserver()
     private var album: Album? = null
     private var currentTrackIndex = 0
+    private var currentPlayingTrack: Track? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +37,20 @@ class AppActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         adapter = TracksAdapter { track ->
-            playTrack(track)
+            if (track.isPlaying) {
+                pauseTrack(track)
+            } else {
+                playTrack(track)
+            }
         }
-        binding.tracksList.adapter = adapter
+
+        binding.tracksList.apply {
+            layoutManager = LinearLayoutManager(this@AppActivity)
+            adapter = this@AppActivity.adapter
+            setHasFixedSize(true)
+        }
     }
+
 
     private fun loadAlbum() {
         lifecycleScope.launchWhenCreated {
@@ -87,12 +99,21 @@ class AppActivity : AppCompatActivity() {
 
     private fun playTrack(track: Track) {
         album?.let { album ->
+            if (track.isPlaying && mediaObserver.player?.isPlaying == true) {
+                pause()
+                return
+            }
+
+            mediaObserver.player?.stop()
+            mediaObserver.player?.reset()
+
+            album.tracks.forEach { it.isPlaying = false }
+
+            track.isPlaying = true
             currentTrackIndex = album.tracks.indexOf(track)
-            updateTracksPlayingState()
 
             val url = "https://raw.githubusercontent.com/netology-code/andad-homeworks/master/09_multimedia/data/${track.file}"
             mediaObserver.apply {
-                player?.reset()
                 player?.setDataSource(url)
                 play()
 
@@ -102,7 +123,15 @@ class AppActivity : AppCompatActivity() {
             }
 
             binding.playPauseButton.setImageResource(R.drawable.ic_pause)
+            adapter.notifyDataSetChanged()
         }
+    }
+
+    private fun pauseTrack(track: Track) {
+        track.isPlaying = false
+        mediaObserver.player?.pause()
+        binding.playPauseButton.setImageResource(R.drawable.ic_play)
+        adapter.notifyDataSetChanged()
     }
 
     private fun pause() {
@@ -111,16 +140,22 @@ class AppActivity : AppCompatActivity() {
     }
 
     private fun nextTrack() {
-        album?.let {
-            currentTrackIndex = (currentTrackIndex + 1) % it.tracks.size
-            playTrack(it.tracks[currentTrackIndex])
+        album?.let { album ->
+            val currentIndex = album.tracks.indexOf(currentPlayingTrack)
+            if (currentIndex != -1) {
+                val nextIndex = (currentIndex + 1) % album.tracks.size
+                playTrack(album.tracks[nextIndex])
+            }
         }
     }
 
     private fun prevTrack() {
-        album?.let {
-            currentTrackIndex = (currentTrackIndex - 1 + it.tracks.size) % it.tracks.size
-            playTrack(it.tracks[currentTrackIndex])
+        album?.let { album ->
+            val currentIndex = album.tracks.indexOf(currentPlayingTrack)
+            if (currentIndex != -1) {
+                val prevIndex = (currentIndex - 1 + album.tracks.size) % album.tracks.size
+                playTrack(album.tracks[prevIndex])
+            }
         }
     }
 
