@@ -22,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.maps.android.collections.MarkerManager
 import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.awaitAnimateCamera
@@ -63,6 +64,10 @@ class MapsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         repository = MarkerRepository(requireContext())
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+
+        view.findViewById<FloatingActionButton>(R.id.fabList).setOnClickListener {
+            (requireActivity() as AppActivity).showMarkersList()
+        }
 
         lifecycle.coroutineScope.launchWhenCreated {
             googleMap = mapFragment.awaitMap().apply {
